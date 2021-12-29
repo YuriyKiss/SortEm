@@ -20,23 +20,22 @@ public class PuppetMovement : MonoBehaviour
     /* Puppet personal values */
     [Header("Unique Values")]
     public string color;
-    private float timer = 1f;
+    private float timer = 0f;
 
     [Header("Positioning")]
     public string startAnimaion;
     private string fallingAnimation = "Falling Idle";
 
-    private Vector3 destination = Vector3.zero;
-    private Vector3 lastPosition;
-
     // State booleans
     private bool isSelected = false;
-    private bool actionCompleted = false;
+    private bool isDisabled = false;
 
     /* These components are set up in inspector */
     [Header("Shared Components")]
     [SerializeField] private GameObject pointHips;
     [SerializeField] private GameObject pointChest;
+
+    [SerializeField] private Rigidbody hips;
 
     [SerializeField] private RotationConstraint rotation;
     [SerializeField] private GameObject smokeParticle;
@@ -86,7 +85,7 @@ public class PuppetMovement : MonoBehaviour
                 StartCoroutine(InstantiateSmoke());
                 DestroyHand();
 
-                PreparePositioning(-0.55f, 0.55f, 0f);
+                DisablePuppet();
 
                 isSelected = false;
             }
@@ -94,74 +93,40 @@ public class PuppetMovement : MonoBehaviour
 
         if (!isSelected)
         {
-            if (timer < 0.5f)
+            if (timer < 3f)
             {
                 timer += Time.deltaTime;
-
-                rigid.MovePosition(Vector3.Lerp(lastPosition, destination, timer * 2f));
             }
-            else if (!actionCompleted)
+            else if (isDisabled)
             {
-                rotation.constraintActive = false;
-                UpdateWeights(0.8f, 0.6f, false);
-                animator.Play(startAnimaion, -1, Random.Range(0, 1f));
-
-                actionCompleted = true;
+                EnablePuppet();
             }
         }
     }
 
     public void SetSelected(GameObject hand, Vector3 position) 
 	{
-        timer = 0f;
+        if (!isDisabled)
+        {
+            timer = 0f;
 
-        CreateHand(hand, position);
+            CreateHand(hand, position);
 
-        rotation.constraintActive = true;
-        UpdateWeights(0.3f, 0.2f, true);
-        animator.Play(fallingAnimation);
+            rotation.constraintActive = true;
+            UpdateWeights(0.3f, 0.2f, true);
+            animator.Play(fallingAnimation);
 
-        isSelected = true;
-        actionCompleted = false;
+            isSelected = true;
+        }
     }
+
+    #region IEnumerators
 
     public IEnumerator StartDancing()
     {
         yield return new WaitForSeconds(Random.Range(0, 2f));
 
         animator.Play("Dancing");
-    }
-
-    private void PreparePositioning(float limitLeft, float limitRight, float middlePoint)
-    {
-        lastPosition = rigid.position;
-
-        // Calculating destination coordinates
-        if (lastPosition.x > limitLeft && lastPosition.x < limitRight)
-        {
-            if (lastPosition.x < middlePoint) 
-                destination.x = limitLeft;
-            else 
-                destination.x = limitRight;
-        }
-        else
-        {
-            destination.x = lastPosition.x;
-        }
-
-        destination.y = stash.originalYCoord;
-
-        if (lastPosition.z > limitLeft && lastPosition.z < limitRight)
-        {
-            if (lastPosition.z < middlePoint) 
-                destination.z = limitLeft;
-            else 
-                destination.z = limitRight;
-        }
-        else
-        {
-            destination.z = lastPosition.z;
-        }
     }
 
     private IEnumerator InstantiateSmoke()
@@ -175,8 +140,35 @@ public class PuppetMovement : MonoBehaviour
         Destroy(smoke);
     }
 
+    #endregion
+
+    #region PuppetActivity
+
+    private void DisablePuppet()
+    {
+        UpdateWeights(0.3f, 0.2f, false);
+        puppetMaster.state = PuppetMaster.State.Dead;
+        hips.constraints = RigidbodyConstraints.None;
+
+        isDisabled = true;
+    }
+
+    private void EnablePuppet()
+    {
+        rigid.MovePosition(hips.position + Vector3.up * 0.01f);
+        puppetMaster.state = PuppetMaster.State.Alive;
+        UpdateWeights(0.8f, 0.6f, false);
+        hips.transform.rotation = gameObject.transform.rotation;
+        hips.constraints = RigidbodyConstraints.FreezeRotation;
+        rotation.constraintActive = false;
+        animator.Play(startAnimaion, -1, Random.Range(0, 1f));
+
+        isDisabled = false;
+    }
+
+    #endregion
+
     #region PuppetMaster
-    /* Puppet master muscle weight control */
 
     private void UpdateWeights(float muscle, float pin, bool points)
     {
@@ -192,9 +184,11 @@ public class PuppetMovement : MonoBehaviour
 
     private void SetMuscleWeight(float weight) =>
 		puppetMaster.muscleWeight = weight;
+
     #endregion
 
     #region HandTracker
+
     private void CreateHand(GameObject hand, Vector3 position)
     {
         if (hand == null) return;
@@ -214,5 +208,6 @@ public class PuppetMovement : MonoBehaviour
             }
         }
     }
+
     #endregion
 }

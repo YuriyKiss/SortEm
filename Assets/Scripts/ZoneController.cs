@@ -9,7 +9,11 @@ public class ZoneController : MonoBehaviour
 
     private void Start()
     {
-        endGame = GameObject.FindGameObjectWithTag("Scripts").GetComponent<EndGameConditions>();
+        GameObject scripts = GameObject.FindGameObjectWithTag("Scripts");
+
+        endGame = scripts.GetComponent<EndGameConditions>();
+
+        characters = new List<GameObject>();
     }
 
     private void OnTriggerEnter(Collider other)

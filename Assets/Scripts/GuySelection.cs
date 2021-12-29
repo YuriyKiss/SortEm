@@ -7,7 +7,7 @@ public class GuySelection : MonoBehaviour
     private readonly int layerSelectable = 6;
     private readonly float rayLength = 100f;
     
-    [SerializeField] private readonly bool handTracker;
+    [SerializeField] private bool handTracker;
     [SerializeField] private GameObject hand;
 
     private void Start() => 
