@@ -4146,6 +4146,7 @@ GameObject:
   - component: {fileID: 4533922403649026975}
   - component: {fileID: 2731083324101089936}
   - component: {fileID: 3702846326991224341}
+  - component: {fileID: 3702846326991224342}
   m_Layer: 0
   m_Name: HorizontalWall
   m_TagString: Untagged
@@ -4166,6 +4167,20 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 0.4064242, y: 10.542429, z: 1.7225957}
   m_Center: {x: 0, y: 0, z: 0.86129785}
+--- !u!136 &3702846326991224342
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3702846326991224340}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  m_Radius: 0.22
+  m_Height: 11
+  m_Direction: 1
+  m_Center: {x: 0, y: 0, z: 1.64}
 --- !u!1 &3805790413168232283
 GameObject:
   m_ObjectHideFlags: 0
@@ -4561,6 +4576,7 @@ GameObject:
   - component: {fileID: 2967195725593261144}
   - component: {fileID: 6502684380343935860}
   - component: {fileID: 6250133742839043824}
+  - component: {fileID: 6250133742839043825}
   m_Layer: 0
   m_Name: VerticalWall
   m_TagString: Untagged
@@ -4581,6 +4597,20 @@ BoxCollider:
   serializedVersion: 2
   m_Size: {x: 0.4064244, y: 7.4158125, z: 1.7225952}
   m_Center: {x: -0.000000014901161, y: -0.022198558, z: 0.8612976}
+--- !u!136 &6250133742839043825
+CapsuleCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6250133742839043823}
+  m_Material: {fileID: 0}
+  m_IsTrigger: 0
+  m_Enabled: 1
+  m_Radius: 0.2
+  m_Height: 7.8
+  m_Direction: 1
+  m_Center: {x: 0, y: 0, z: 1.72}
 --- !u!23 &6502684380343935860
 MeshRenderer:
   m_ObjectHideFlags: 0

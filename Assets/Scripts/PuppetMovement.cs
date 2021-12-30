@@ -14,21 +14,9 @@ public class PuppetMovement : MonoBehaviour
 
     /* Puppet personal components */
     private Rigidbody rigid;
+    private BoxCollider coll;
     private Animator animator;
     private PuppetMaster puppetMaster;
-
-    /* Puppet personal values */
-    [Header("Unique Values")]
-    public string color;
-    private float timer = 0f;
-
-    [Header("Positioning")]
-    public string startAnimaion;
-    private string fallingAnimation = "Falling Idle";
-
-    // State booleans
-    private bool isSelected = false;
-    private bool isDisabled = false;
 
     /* These components are set up in inspector */
     [Header("Shared Components")]
@@ -40,11 +28,41 @@ public class PuppetMovement : MonoBehaviour
     [SerializeField] private RotationConstraint rotation;
     [SerializeField] private GameObject smokeParticle;
 
+    /* Puppet personal values */
+    [Header("Unique Values")]
+    public string color;
+
+    [Header("Positioning")]
+    public string startAnimaion;
+
+    /* State properties */
+    private float timer = 0f;
+
+    private bool isSelected = false;
+    private bool isDisabled = false;
+
+    /* Constant values */
+    private float movementMultiplier = 0.006f;
+    private float puppetInDisabledStateTime = 3f;
+
+    private float flyingMuscleWeight = 0.3f;
+    private float flyingPinWeight = 0.2f;
+    private float standingMuscleWeight = 0.8f;
+    private float standingPinWeight = 0.6f;
+
+    private float smokeDisappearingTime = 1.1f;
+
+    private string danceAnimation = "Dancing";
+    private string fallingAnimation = "Falling Idle";
+
+    private Vector3 handDisplacement = new Vector3(0.2f, -0.20f, 0.25f);
+
     void Start()
 	{
 		stash = GameObject.FindGameObjectWithTag("Scripts").GetComponent<Stash>();
 
         rigid = GetComponent<Rigidbody>();
+        coll = GetComponent<BoxCollider>();
         animator = GetComponentInChildren<Animator>();
         puppetMaster = GetComponentInChildren<PuppetMaster>();
 
@@ -63,18 +81,18 @@ public class PuppetMovement : MonoBehaviour
             {
                 float y = rigid.position.y;
 
-                if (y != stash.desiredYCoord && timer < 0.15f)
+                if (y != stash.desiredYCoord)
                 {
-                    timer += Time.deltaTime * 0.1f;
+                    timer += Time.deltaTime;
 
-                    y = Mathf.Lerp(rigid.position.y, stash.desiredYCoord, timer);
+                    y = Mathf.Lerp(stash.originalYCoord, stash.desiredYCoord, timer);
                 }
 
                 rigid.MovePosition(new Vector3(
-                    Mathf.Clamp(rigid.position.x - touch.deltaPosition.x * 0.006f,
+                    Mathf.Clamp(rigid.position.x - touch.deltaPosition.x * movementMultiplier,
                                 stash.playerMovementLimitations.x, stash.playerMovementLimitations.y),
                     y,
-                    Mathf.Clamp(rigid.position.z - touch.deltaPosition.y * 0.006f,
+                    Mathf.Clamp(rigid.position.z - touch.deltaPosition.y * movementMultiplier,
                                 stash.playerMovementLimitations.z, stash.playerMovementLimitations.w)));
             }
 
@@ -93,13 +111,31 @@ public class PuppetMovement : MonoBehaviour
 
         if (!isSelected)
         {
-            if (timer < 3f)
+            if (timer < puppetInDisabledStateTime)
             {
                 timer += Time.deltaTime;
             }
             else if (isDisabled)
             {
                 EnablePuppet();
+            }
+        }
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.name == hips.name)
+        {
+            PuppetMovement puppet = other.GetComponentInParent<PuppetMovement>();
+
+            if (puppet != this && !isDisabled)
+            {
+                if (puppet.IsDisabled())
+                {
+                    timer = 1f;
+
+                    DisablePuppet();
+                }
             }
         }
     }
@@ -113,7 +149,7 @@ public class PuppetMovement : MonoBehaviour
             CreateHand(hand, position);
 
             rotation.constraintActive = true;
-            UpdateWeights(0.3f, 0.2f, true);
+            UpdateWeights(flyingMuscleWeight, flyingPinWeight, true);
             animator.Play(fallingAnimation);
 
             isSelected = true;
@@ -126,7 +162,7 @@ public class PuppetMovement : MonoBehaviour
     {
         yield return new WaitForSeconds(Random.Range(0, 2f));
 
-        animator.Play("Dancing");
+        animator.Play(danceAnimation);
     }
 
     private IEnumerator InstantiateSmoke()
@@ -135,7 +171,7 @@ public class PuppetMovement : MonoBehaviour
 
         smoke.transform.position += transform.position;
 
-        yield return new WaitForSeconds(1.1f);
+        yield return new WaitForSeconds(smokeDisappearingTime);
 
         Destroy(smoke);
     }
@@ -146,22 +182,57 @@ public class PuppetMovement : MonoBehaviour
 
     private void DisablePuppet()
     {
-        UpdateWeights(0.3f, 0.2f, false);
+        coll.enabled = false;
+        UpdateWeights(flyingMuscleWeight, flyingPinWeight, false);
         puppetMaster.state = PuppetMaster.State.Dead;
         hips.constraints = RigidbodyConstraints.None;
 
         isDisabled = true;
     }
 
+    private Vector3 PreparePosition(float limitLeft, float limitRight, float middlePoint)
+    {
+        Vector3 result = Vector3.zero;
+
+        if (hips.position.x > limitLeft && hips.position.x < limitRight)
+        {
+            if (hips.position.x < middlePoint)
+                result.x = limitLeft;
+            else
+                result.x = limitRight;
+        }
+        else
+        {
+            result.x = hips.position.x;
+        }
+
+        result.y = stash.originalYCoord;
+
+        if (hips.position.z > limitLeft && hips.position.z < limitRight)
+        {
+            if (hips.position.z < middlePoint)
+                result.z = limitLeft;
+            else
+                result.z = limitRight;
+        }
+        else
+        {
+            result.z = hips.position.z;
+        }
+
+        return result;
+    }
+
     private void EnablePuppet()
     {
-        rigid.MovePosition(hips.position + Vector3.up * 0.01f);
+        rigid.MovePosition(PreparePosition(-0.5f, 0.5f, 0));
         puppetMaster.state = PuppetMaster.State.Alive;
-        UpdateWeights(0.8f, 0.6f, false);
+        UpdateWeights(standingMuscleWeight, standingPinWeight, false);
         hips.transform.rotation = gameObject.transform.rotation;
         hips.constraints = RigidbodyConstraints.FreezeRotation;
         rotation.constraintActive = false;
         animator.Play(startAnimaion, -1, Random.Range(0, 1f));
+        coll.enabled = true;
 
         isDisabled = false;
     }
@@ -193,7 +264,7 @@ public class PuppetMovement : MonoBehaviour
     {
         if (hand == null) return;
 
-        hand.transform.position = position + new Vector3(0.2f, -0.20f, 0.25f);
+        hand.transform.position = position + handDisplacement;
         hand.transform.rotation = Quaternion.Euler(Vector3.right * - Camera.main.transform.rotation.eulerAngles.x);
         Instantiate(hand, gameObject.transform, true);
     }
@@ -209,5 +280,9 @@ public class PuppetMovement : MonoBehaviour
         }
     }
 
+    #endregion
+
+    #region Booleans
+    public bool IsDisabled() => isDisabled;
     #endregion
 }

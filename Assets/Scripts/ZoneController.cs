@@ -5,7 +5,7 @@ public class ZoneController : MonoBehaviour
 {
     private EndGameConditions endGame;
 
-    private List<GameObject> characters;
+    public List<GameObject> characters;
 
     private void Start()
     {
@@ -18,14 +18,19 @@ public class ZoneController : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
+        ReliableOnTriggerExit.NotifyTriggerEnter(other, gameObject, OnTriggerExit);
+
         if (other.CompareTag("Player"))
         {
             characters.Add(other.gameObject);
             endGame.CheckConditions();
         }
     }
+
     private void OnTriggerExit(Collider other)
     {
+        ReliableOnTriggerExit.NotifyTriggerExit(other, gameObject);
+
         if (other.CompareTag("Player"))
         {
             characters.Remove(other.gameObject);
