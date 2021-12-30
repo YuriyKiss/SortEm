@@ -3,6 +3,8 @@ using System.Collections;
 
 public class EndGameConditions : MonoBehaviour
 {
+    private float finishPause = 0.5f;
+
     [SerializeField] private GameObject winMenu;
 
     public void CheckConditions()
@@ -21,7 +23,7 @@ public class EndGameConditions : MonoBehaviour
 
     private IEnumerator FinishGame()
     {
-        yield return new WaitForSeconds(0.5f);
+        yield return new WaitForSeconds(finishPause);
 
         winMenu.SetActive(true);
 

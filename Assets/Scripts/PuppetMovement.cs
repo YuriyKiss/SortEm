@@ -34,6 +34,7 @@ public class PuppetMovement : MonoBehaviour
 
     [Header("Positioning")]
     public string startAnimaion;
+    public bool canWalkAround = false;
 
     /* State properties */
     private float timer = 0f;
@@ -42,6 +43,8 @@ public class PuppetMovement : MonoBehaviour
     private bool isDisabled = false;
 
     /* Constant values */
+    private float walkDelay;
+
     private float movementMultiplier = 0.006f;
     private float puppetInDisabledStateTime = 3f;
 
@@ -67,6 +70,8 @@ public class PuppetMovement : MonoBehaviour
         puppetMaster = GetComponentInChildren<PuppetMaster>();
 
         animator.Play(startAnimaion, -1, Random.Range(0, 1f));
+
+        walkDelay = Random.Range(3f, 8f);
     }
 
     #endregion
@@ -111,11 +116,9 @@ public class PuppetMovement : MonoBehaviour
 
         if (!isSelected)
         {
-            if (timer < puppetInDisabledStateTime)
-            {
-                timer += Time.deltaTime;
-            }
-            else if (isDisabled)
+            timer += Time.deltaTime;
+
+            if (timer >= puppetInDisabledStateTime && isDisabled)
             {
                 EnablePuppet();
             }

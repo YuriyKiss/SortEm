@@ -1,6 +1,5 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
+using System.Collections.Generic;
 
 // OnTriggerExit is not called if the triggering object is destroyed, set inactive, or if the collider is disabled. This script fixes that
 //
@@ -11,6 +10,7 @@ using UnityEngine;
 // Algorithm: Each ReliableOnTriggerExit is associated with a collider, which is added in OnTriggerEnter via NotifyTriggerEnter
 // Each ReliableOnTriggerExit keeps track of OnTriggerEnter calls
 // If ReliableOnTriggerExit is disabled or the collider is not enabled, call all pending OnTriggerExit calls
+
 public class ReliableOnTriggerExit : MonoBehaviour
 {
     public delegate void _OnTriggerExit(Collider c);
