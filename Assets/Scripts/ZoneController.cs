@@ -1,13 +1,21 @@
 using UnityEngine;
+using UnityEngine.UI;
 using System.Collections.Generic;
 
 public class ZoneController : MonoBehaviour
 {
     private EndGameConditions endGame;
+    [SerializeField] private Slider tracker;
+    private MeshRenderer floor;
 
     private List<GameObject> characters;
 
+    private float trackerSpeed;
     public int charactersAmount;
+    private int correctCharactersAmount;
+
+    [SerializeField] private Material floorColor;
+    [SerializeField] private Material defaultColor;
 
     private void Start()
     {
@@ -15,16 +23,21 @@ public class ZoneController : MonoBehaviour
 
         endGame = scripts.GetComponent<EndGameConditions>();
 
+        floor = GetComponentInChildren<MeshRenderer>();
+
         characters = new List<GameObject>();
+
+        trackerSpeed = 0.03f / charactersAmount;
     }
 
     private void OnTriggerEnter(Collider other)
     {
         ReliableOnTriggerExit.NotifyTriggerEnter(other, gameObject, OnTriggerExit);
 
-        if (other.CompareTag("Player"))
+        if (other.CompareTag("Trigger"))
         {
-            characters.Add(other.gameObject);
+            characters.Add(other.GetComponentInParent<PuppetMovement>().gameObject);
+            UpdateCorrectCharacters();
             endGame.CheckConditions();
         }
     }
@@ -33,17 +46,18 @@ public class ZoneController : MonoBehaviour
     {
         ReliableOnTriggerExit.NotifyTriggerExit(other, gameObject);
 
-        if (other.CompareTag("Player"))
+        if (other.CompareTag("Trigger"))
         {
-            characters.Remove(other.gameObject);
+            characters.Remove(other.GetComponentInParent<PuppetMovement>().gameObject);
+            UpdateCorrectCharacters();
         }
     }
-    
-    public bool CompareCharacters()
+
+    private void UpdateCorrectCharacters()
     {
         int counter = 0;
 
-        foreach(GameObject character in characters)
+        foreach (GameObject character in characters)
         {
             PuppetMovement puppet = character.GetComponent<PuppetMovement>();
 
@@ -53,6 +67,31 @@ public class ZoneController : MonoBehaviour
             }
         }
 
-        return counter == charactersAmount;
+        correctCharactersAmount = counter;
+
+        if (characters.Count == correctCharactersAmount && correctCharactersAmount == charactersAmount) 
+            floor.material = floorColor;
+        else 
+            floor.material = defaultColor;
+    }
+    
+    public bool CompareCharacters() => 
+        correctCharactersAmount == charactersAmount;
+
+    public bool FindCharacter(GameObject character) =>
+        characters.Contains(character);
+
+    private void Update()
+    {
+        float percentage = (float)correctCharactersAmount / (float)charactersAmount;
+
+        if (tracker.value < percentage)
+        {
+            tracker.value += trackerSpeed;
+        }
+        else if (tracker.value > percentage + trackerSpeed)
+        {
+            tracker.value -= trackerSpeed;
+        }
     }
 }

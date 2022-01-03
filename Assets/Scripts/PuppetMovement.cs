@@ -43,6 +43,7 @@ public class PuppetMovement : MonoBehaviour
     private bool isSelected = false;
     private bool isDisabled = false;
     private bool isRunning = false;
+    private bool isCentered = false;
 
     /* Constant values */
     private float walkDelay;
@@ -183,6 +184,7 @@ public class PuppetMovement : MonoBehaviour
             UpdateWeights(flyingMuscleWeight, flyingPinWeight, true);
             animator.Play(fallingAnimation);
 
+            isCentered = false;
             isSelected = true;
             isRunning = false;
         }
@@ -208,13 +210,22 @@ public class PuppetMovement : MonoBehaviour
         Destroy(smoke);
     }
 
+    #endregion
+
+    #region Running
+
     private IEnumerator RunOnScene()
     {
-        yield return StartCoroutine(RandomiseRotation());
+        int mode = 0; // 0 = walk to wall, 1 = walk to center
+
+        if (!isCentered)
+            mode = Random.Range(0, 2);
+
+        yield return StartCoroutine(RandomiseRotation(mode));
 
         animator.Play(runAnimation);
 
-        yield return StartCoroutine(StartMovement());
+        yield return StartCoroutine(StartMovement(mode));
 
         animator.Play(startAnimaion);
 
@@ -222,13 +233,23 @@ public class PuppetMovement : MonoBehaviour
         isRunning = false;
     }
 
-    private IEnumerator RandomiseRotation()
+    private IEnumerator RandomiseRotation(int mode)
     {
-        float deltaRotation = Mathf.Sign(Random.Range(-1f, 1f)) * Random.Range(90, 180);
+        float deltaRotation = 0;
+        if (mode == 0)
+            deltaRotation = Mathf.Sign(Random.Range(-1f, 1f)) * Random.Range(90, 180);
 
         float rotationTimer = 0f;
+
         Vector3 startRotation = transform.rotation.eulerAngles;
-        Vector3 endRotation = transform.rotation.eulerAngles + Vector3.up * deltaRotation;
+        Vector3 endRotation = Vector3.zero;
+
+        if (mode == 0)
+            endRotation = transform.rotation.eulerAngles + Vector3.up * deltaRotation;
+        else if (mode == 1)
+            endRotation = Quaternion.LookRotation((- transform.position + FindZone()).normalized).eulerAngles;
+
+        endRotation.x = 0f;
 
         while (rotationTimer < 0.5f && isRunning)
         {
@@ -240,16 +261,54 @@ public class PuppetMovement : MonoBehaviour
         }
     }
 
-    private IEnumerator StartMovement()
+    private IEnumerator StartMovement(int mode)
     {
         float speed = 0.05f;
 
-        while (!Physics.Raycast(transform.position, transform.forward, 0.1f, 1 << 4) && isRunning)
+        if (mode == 0)
         {
-            transform.position += transform.forward * speed;
+            while (!Physics.Raycast(transform.position, transform.forward, 0.1f, 1 << 4) && isRunning)
+            {
+                transform.position += transform.forward * speed;
 
-            yield return null;
+                yield return null;
+            }
+
+            if (isRunning) isCentered = false;
         }
+        else if (mode == 1)
+        {
+            float positionTimer = 0f;
+
+            Vector3 startPosition = transform.position;
+            Vector3 finalPosition = FindZone();
+
+            while (Vector3.Distance(transform.position, finalPosition) > 0.05f && isRunning)
+            {
+                positionTimer += Time.deltaTime;
+
+                transform.position = Vector3.Lerp(startPosition, finalPosition, positionTimer);
+
+                yield return null;
+            }
+
+            if (isRunning) isCentered = true;
+        }
+    }
+
+    private Vector3 FindZone()
+    {
+        foreach (GameObject zone in GameObject.FindGameObjectsWithTag("Zone"))
+        {
+            ZoneController controller = zone.GetComponent<ZoneController>();
+
+            if (controller.FindCharacter(gameObject))
+            {
+                return zone.transform.position;
+            } 
+        }
+
+        return transform.position;
     }
 
     #endregion
