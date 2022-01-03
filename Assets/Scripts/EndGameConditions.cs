@@ -3,6 +3,7 @@ using System.Collections;
 
 public class EndGameConditions : MonoBehaviour
 {
+    public bool isFinished = false;
     private float finishPause = 0.5f;
 
     [SerializeField] private GameObject winMenu;
@@ -17,12 +18,14 @@ public class EndGameConditions : MonoBehaviour
 
             if (!controller.CompareCharacters()) finish = false;
         }
-        
+
         if (finish) StartCoroutine(FinishGame());
     }
 
     private IEnumerator FinishGame()
     {
+        isFinished = true;
+
         yield return new WaitForSeconds(finishPause);
 
         winMenu.SetActive(true);

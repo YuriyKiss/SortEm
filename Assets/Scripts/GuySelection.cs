@@ -7,11 +7,11 @@ public class GuySelection : MonoBehaviour
     private readonly int layerSelectable = 6;
     private readonly float rayLength = 100f;
     
-    [SerializeField] private bool handTracker;
+    [SerializeField] private bool isTrackingPlayer;
     [SerializeField] private GameObject hand;
 
     private void Start() => 
-        hand = handTracker ? hand : null;
+        hand = isTrackingPlayer ? hand : null;
 
     private void Update()
     {
@@ -19,7 +19,10 @@ public class GuySelection : MonoBehaviour
         {
             Ray raycast = Camera.main.ScreenPointToRay(Input.GetTouch(0).position);
 
-            if (Physics.Raycast(raycast, out RaycastHit raycastHit, rayLength, 1 << layerSelectable, QueryTriggerInteraction.Collide))
+            bool rayHitSelectable = Physics.Raycast(raycast, out RaycastHit raycastHit, 
+                rayLength, 1 << layerSelectable, QueryTriggerInteraction.Collide);
+
+            if (rayHitSelectable)
             {
                 if (raycastHit.collider.CompareTag("Player"))
                 {
@@ -31,3 +34,4 @@ public class GuySelection : MonoBehaviour
         }
     }
 }
+

@@ -5,7 +5,9 @@ public class ZoneController : MonoBehaviour
 {
     private EndGameConditions endGame;
 
-    public List<GameObject> characters;
+    private List<GameObject> characters;
+
+    public int charactersAmount;
 
     private void Start()
     {
@@ -39,18 +41,18 @@ public class ZoneController : MonoBehaviour
     
     public bool CompareCharacters()
     {
-        bool result = true;
+        int counter = 0;
 
         foreach(GameObject character in characters)
         {
             PuppetMovement puppet = character.GetComponent<PuppetMovement>();
 
-            if (puppet.color != gameObject.name)
+            if (puppet.color == gameObject.name)
             {
-                result = false;
+                ++counter;
             }
         }
 
-        return result;
+        return counter == charactersAmount;
     }
 }

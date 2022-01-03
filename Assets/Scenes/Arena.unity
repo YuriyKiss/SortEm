@@ -320,10 +320,10 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 220742354}
+  - component: {fileID: 220742358}
   - component: {fileID: 220742355}
   - component: {fileID: 220742356}
   - component: {fileID: 220742357}
-  - component: {fileID: 220742358}
   m_Layer: 0
   m_Name: Scripts
   m_TagString: Scripts
@@ -372,7 +372,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7823d9d82a9e7ec4b9b62d989a783b34, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  handTracker: 1
+  isTrackingPlayer: 1
   hand: {fileID: 7506362589099501540, guid: 688dc965d0b084c47bf03b39b5c99c2b, type: 3}
 --- !u!114 &220742357
 MonoBehaviour:
@@ -386,6 +386,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f857c8a0b0b0c654bb2d17adcb691fa0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  isFinished: 0
   winMenu: {fileID: 4583421826312680844}
 --- !u!114 &220742358
 MonoBehaviour:
@@ -421,6 +422,10 @@ PrefabInstance:
     - target: {fileID: 581936721310306718, guid: e808f960686702b498e8d2906930e348, type: 3}
       propertyPath: color
       value: Red
+      objectReference: {fileID: 0}
+    - target: {fileID: 581936721310306718, guid: e808f960686702b498e8d2906930e348, type: 3}
+      propertyPath: canWalkAround
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 581936721310306718, guid: e808f960686702b498e8d2906930e348, type: 3}
       propertyPath: startAnimaion
@@ -767,7 +772,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 274b3ce4319c1b64aaf0f00dcd4e180f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  characters: []
+  charactersAmount: 2
 --- !u!1 &458916714
 GameObject:
   m_ObjectHideFlags: 0
@@ -1200,7 +1205,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 274b3ce4319c1b64aaf0f00dcd4e180f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  characters: []
+  charactersAmount: 1
 --- !u!65 &1039560422
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -1420,7 +1425,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 274b3ce4319c1b64aaf0f00dcd4e180f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  characters: []
+  charactersAmount: 2
 --- !u!65 &1356810750
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -1734,6 +1739,10 @@ PrefabInstance:
     - target: {fileID: 581936721310306718, guid: e808f960686702b498e8d2906930e348, type: 3}
       propertyPath: color
       value: Blue
+      objectReference: {fileID: 0}
+    - target: {fileID: 581936721310306718, guid: e808f960686702b498e8d2906930e348, type: 3}
+      propertyPath: canWalkAround
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 581936721310306718, guid: e808f960686702b498e8d2906930e348, type: 3}
       propertyPath: startAnimaion
@@ -2240,6 +2249,10 @@ PrefabInstance:
     - target: {fileID: 581936721310306718, guid: e808f960686702b498e8d2906930e348, type: 3}
       propertyPath: color
       value: Red
+      objectReference: {fileID: 0}
+    - target: {fileID: 581936721310306718, guid: e808f960686702b498e8d2906930e348, type: 3}
+      propertyPath: canWalkAround
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 581936721310306718, guid: e808f960686702b498e8d2906930e348, type: 3}
       propertyPath: startAnimaion
@@ -2780,6 +2793,10 @@ PrefabInstance:
     - target: {fileID: 581936721310306718, guid: e808f960686702b498e8d2906930e348, type: 3}
       propertyPath: color
       value: Yellow
+      objectReference: {fileID: 0}
+    - target: {fileID: 581936721310306718, guid: e808f960686702b498e8d2906930e348, type: 3}
+      propertyPath: canWalkAround
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 581936721310306718, guid: e808f960686702b498e8d2906930e348, type: 3}
       propertyPath: startAnimaion
@@ -3559,7 +3576,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 274b3ce4319c1b64aaf0f00dcd4e180f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  characters: []
+  charactersAmount: 1
 --- !u!65 &1849008583
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -3668,6 +3685,10 @@ PrefabInstance:
     - target: {fileID: 581936721310306718, guid: e808f960686702b498e8d2906930e348, type: 3}
       propertyPath: color
       value: Green
+      objectReference: {fileID: 0}
+    - target: {fileID: 581936721310306718, guid: e808f960686702b498e8d2906930e348, type: 3}
+      propertyPath: canWalkAround
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 581936721310306718, guid: e808f960686702b498e8d2906930e348, type: 3}
       propertyPath: startAnimaion
@@ -4157,7 +4178,7 @@ GameObject:
   - component: {fileID: 1698423831807511534}
   - component: {fileID: 1698423831807511536}
   - component: {fileID: 1698423831807511535}
-  m_Layer: 0
+  m_Layer: 4
   m_Name: OuterWalls
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4283,7 +4304,7 @@ GameObject:
   - component: {fileID: 3060959927812525665}
   - component: {fileID: 1739801351418877014}
   - component: {fileID: 2709742050235572842}
-  m_Layer: 4
+  m_Layer: 0
   m_Name: Floor
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4405,7 +4426,7 @@ GameObject:
   - component: {fileID: 2731083324101089936}
   - component: {fileID: 3702846326991224341}
   - component: {fileID: 3702846326991224342}
-  m_Layer: 0
+  m_Layer: 4
   m_Name: HorizontalWall
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -4835,7 +4856,7 @@ GameObject:
   - component: {fileID: 6502684380343935860}
   - component: {fileID: 6250133742839043824}
   - component: {fileID: 6250133742839043825}
-  m_Layer: 0
+  m_Layer: 4
   m_Name: VerticalWall
   m_TagString: Untagged
   m_Icon: {fileID: 0}

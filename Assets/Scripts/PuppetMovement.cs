@@ -11,6 +11,7 @@ public class PuppetMovement : MonoBehaviour
 
     /* Global components */
     private Stash stash;
+    private EndGameConditions endGame;
 
     /* Puppet personal components */
     private Rigidbody rigid;
@@ -41,6 +42,7 @@ public class PuppetMovement : MonoBehaviour
 
     private bool isSelected = false;
     private bool isDisabled = false;
+    private bool isRunning = false;
 
     /* Constant values */
     private float walkDelay;
@@ -55,6 +57,7 @@ public class PuppetMovement : MonoBehaviour
 
     private float smokeDisappearingTime = 1.1f;
 
+    private string runAnimation = "Running";
     private string danceAnimation = "Dancing";
     private string fallingAnimation = "Falling Idle";
 
@@ -63,6 +66,7 @@ public class PuppetMovement : MonoBehaviour
     void Start()
 	{
 		stash = GameObject.FindGameObjectWithTag("Scripts").GetComponent<Stash>();
+        endGame = GameObject.FindGameObjectWithTag("Scripts").GetComponent<EndGameConditions>();
 
         rigid = GetComponent<Rigidbody>();
         coll = GetComponent<BoxCollider>();
@@ -122,6 +126,17 @@ public class PuppetMovement : MonoBehaviour
             {
                 EnablePuppet();
             }
+
+            if (timer >= walkDelay && !isRunning && canWalkAround)
+            {
+                isRunning = true;
+                walkDelay = Random.Range(3f, 8f);
+
+                if (!endGame.isFinished)
+                {
+                    StartCoroutine(RunOnScene());
+                }
+            }
         }
     }
 
@@ -137,7 +152,20 @@ public class PuppetMovement : MonoBehaviour
                 {
                     timer = 1f;
 
+                    isRunning = false;
+
                     DisablePuppet();
+                }
+
+                if (puppet.IsRunning())
+                {
+                    timer = 0f;
+
+                    DisablePuppet();
+
+                    puppet.timer = 0f;
+
+                    puppet.DisablePuppet();
                 }
             }
         }
@@ -145,7 +173,7 @@ public class PuppetMovement : MonoBehaviour
 
     public void SetSelected(GameObject hand, Vector3 position) 
 	{
-        if (!isDisabled)
+        if (!isDisabled && !endGame.isFinished)
         {
             timer = 0f;
 
@@ -156,6 +184,7 @@ public class PuppetMovement : MonoBehaviour
             animator.Play(fallingAnimation);
 
             isSelected = true;
+            isRunning = false;
         }
     }
 
@@ -179,9 +208,53 @@ public class PuppetMovement : MonoBehaviour
         Destroy(smoke);
     }
 
+    private IEnumerator RunOnScene()
+    {
+        yield return StartCoroutine(RandomiseRotation());
+
+        animator.Play(runAnimation);
+
+        yield return StartCoroutine(StartMovement());
+
+        animator.Play(startAnimaion);
+
+        timer = 0f;
+        isRunning = false;
+    }
+
+    private IEnumerator RandomiseRotation()
+    {
+        float deltaRotation = Mathf.Sign(Random.Range(-1f, 1f)) * Random.Range(90, 180);
+
+        float rotationTimer = 0f;
+        Vector3 startRotation = transform.rotation.eulerAngles;
+        Vector3 endRotation = transform.rotation.eulerAngles + Vector3.up * deltaRotation;
+
+        while (rotationTimer < 0.5f && isRunning)
+        {
+            rotationTimer += Time.deltaTime;
+
+            transform.rotation = Quaternion.Euler(Vector3.Lerp(startRotation, endRotation, rotationTimer * 2));
+
+            yield return null;
+        }
+    }
+
+    private IEnumerator StartMovement()
+    {
+        float speed = 0.05f;
+
+        while (!Physics.Raycast(transform.position, transform.forward, 0.1f, 1 << 4) && isRunning)
+        {
+            transform.position += transform.forward * speed;
+
+            yield return null;
+        }
+    }
+
     #endregion
 
-    #region PuppetActivity
+    #region Enable/Disable
 
     private void DisablePuppet()
     {
@@ -190,6 +263,7 @@ public class PuppetMovement : MonoBehaviour
         puppetMaster.state = PuppetMaster.State.Dead;
         hips.constraints = RigidbodyConstraints.None;
 
+        isRunning = false;
         isDisabled = true;
     }
 
@@ -287,5 +361,9 @@ public class PuppetMovement : MonoBehaviour
 
     #region Booleans
     public bool IsDisabled() => isDisabled;
+
+    public bool IsRunning() => isRunning;
+
+    public bool IsSelected() => isSelected;
     #endregion
 }
