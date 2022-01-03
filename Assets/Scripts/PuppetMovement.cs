@@ -76,7 +76,7 @@ public class PuppetMovement : MonoBehaviour
 
         animator.Play(startAnimaion, -1, Random.Range(0, 1f));
 
-        walkDelay = Random.Range(3f, 8f);
+        walkDelay = Random.Range(3f, 25f);
     }
 
     #endregion
@@ -110,12 +110,11 @@ public class PuppetMovement : MonoBehaviour
             {
                 timer = 0f;
 
-                StartCoroutine(InstantiateSmoke());
                 DestroyHand();
 
-                DisablePuppet();
-
                 isSelected = false;
+
+                DisablePuppet();
             }
         }
 
@@ -131,7 +130,7 @@ public class PuppetMovement : MonoBehaviour
             if (timer >= walkDelay && !isRunning && canWalkAround)
             {
                 isRunning = true;
-                walkDelay = Random.Range(3f, 8f);
+                walkDelay = Random.Range(3f, 25f);
 
                 if (!endGame.isFinished)
                 {
@@ -184,6 +183,8 @@ public class PuppetMovement : MonoBehaviour
             UpdateWeights(flyingMuscleWeight, flyingPinWeight, true);
             animator.Play(fallingAnimation);
 
+            StartCoroutine(InstantiateSmoke());
+
             isCentered = false;
             isSelected = true;
             isRunning = false;
@@ -194,7 +195,7 @@ public class PuppetMovement : MonoBehaviour
 
     public IEnumerator StartDancing()
     {
-        yield return new WaitForSeconds(Random.Range(0, 2f));
+        yield return new WaitForSeconds(Random.Range(0, 4f));
 
         animator.Play(danceAnimation);
     }
@@ -263,7 +264,7 @@ public class PuppetMovement : MonoBehaviour
 
     private IEnumerator StartMovement(int mode)
     {
-        float speed = 0.05f;
+        float speed = 0.08f;
 
         if (mode == 0)
         {
@@ -317,13 +318,16 @@ public class PuppetMovement : MonoBehaviour
 
     private void DisablePuppet()
     {
-        coll.enabled = false;
-        UpdateWeights(flyingMuscleWeight, flyingPinWeight, false);
-        puppetMaster.state = PuppetMaster.State.Dead;
-        hips.constraints = RigidbodyConstraints.None;
+        if (!isSelected)
+        {
+            coll.enabled = false;
+            UpdateWeights(flyingMuscleWeight, flyingPinWeight, false);
+            puppetMaster.state = PuppetMaster.State.Dead;
+            hips.constraints = RigidbodyConstraints.None;
 
-        isRunning = false;
-        isDisabled = true;
+            isRunning = false;
+            isDisabled = true;
+        }
     }
 
     private Vector3 PreparePosition(float limitLeft, float limitRight, float middlePoint)

@@ -32,8 +32,6 @@ public class ZoneController : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        ReliableOnTriggerExit.NotifyTriggerEnter(other, gameObject, OnTriggerExit);
-
         if (other.CompareTag("Trigger"))
         {
             characters.Add(other.GetComponentInParent<PuppetMovement>().gameObject);
@@ -44,8 +42,6 @@ public class ZoneController : MonoBehaviour
 
     private void OnTriggerExit(Collider other)
     {
-        ReliableOnTriggerExit.NotifyTriggerExit(other, gameObject);
-
         if (other.CompareTag("Trigger"))
         {
             characters.Remove(other.GetComponentInParent<PuppetMovement>().gameObject);
@@ -71,7 +67,7 @@ public class ZoneController : MonoBehaviour
 
         if (characters.Count == correctCharactersAmount && correctCharactersAmount == charactersAmount) 
             floor.material = floorColor;
-        else 
+        else if (!endGame.isFinished)
             floor.material = defaultColor;
     }
     
