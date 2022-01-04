@@ -3,7 +3,7 @@ using System.Collections;
 
 public class EndGameConditions : MonoBehaviour
 {
-    public bool isFinished = false;
+    public bool isPaused;
     private float finishPause = 0.5f;
 
     [SerializeField] private GameObject winMenu;
@@ -24,7 +24,7 @@ public class EndGameConditions : MonoBehaviour
 
     private IEnumerator FinishGame()
     {
-        isFinished = true;
+        isPaused = true;
 
         yield return new WaitForSeconds(finishPause);
 

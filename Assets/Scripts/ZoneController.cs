@@ -67,7 +67,7 @@ public class ZoneController : MonoBehaviour
 
         if (characters.Count == correctCharactersAmount && correctCharactersAmount == charactersAmount) 
             floor.material = floorColor;
-        else if (!endGame.isFinished)
+        else if (!endGame.isPaused)
             floor.material = defaultColor;
     }
     
