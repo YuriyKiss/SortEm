@@ -19,22 +19,14 @@ public class PuppetMovement : MonoBehaviour
     private Animator animator;
     private PuppetMaster puppetMaster;
 
-    /* These components are set up in inspector */
-    [Header("Shared Components")]
-    [SerializeField] private GameObject pointHips;
-    [SerializeField] private GameObject pointChest;
-
-    [SerializeField] private Rigidbody hips;
-
-    [SerializeField] private RotationConstraint rotation;
-    [SerializeField] private GameObject smokeParticle;
-
     /* Puppet personal values */
     [Header("Unique Values")]
     public string color;
 
     [Header("Positioning")]
     public string startAnimaion;
+
+    private float walkDelay;
     public bool canWalkAround = false;
 
     /* State properties */
@@ -45,8 +37,17 @@ public class PuppetMovement : MonoBehaviour
     private bool isRunning = false;
     private bool isCentered = false;
 
+    /* These components are set up in inspector */
+    [Header("Shared Components")]
+    [SerializeField] private GameObject pointHips;
+    [SerializeField] private GameObject pointChest;
+
+    [SerializeField] private Rigidbody hips;
+
+    [SerializeField] private RotationConstraint rotation;
+    [SerializeField] private GameObject smokeParticle;
+
     /* Constant values */
-    private float walkDelay;
     private float walkDelayMin = 3f;
     private float walkDelayMax = 10f;
 
@@ -70,8 +71,10 @@ public class PuppetMovement : MonoBehaviour
 
     void Start()
 	{
-		stash = GameObject.FindGameObjectWithTag("Scripts").GetComponent<Stash>();
-        endGame = GameObject.FindGameObjectWithTag("Scripts").GetComponent<EndGameConditions>();
+        GameObject scripts = GameObject.FindGameObjectWithTag("Scripts");
+
+        stash = scripts.GetComponent<Stash>();
+        endGame = scripts.GetComponent<EndGameConditions>();
 
         rigid = GetComponent<Rigidbody>();
         coll = GetComponent<BoxCollider>();

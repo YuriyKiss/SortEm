@@ -7,9 +7,15 @@ public class StartSequence : MonoBehaviour
 
     [SerializeField] private GameObject cam;
     [SerializeField] private GameObject trackers;
+    [SerializeField] private GameObject playMessage;
 
     private float timer = 0f;
     private bool activated = false;
+
+    private Vector3 endPosition = new Vector3(0, 9.7f, 10f);
+    private Vector3 endRotation = new Vector3(50, -180, 0);
+    private float animationLength = 5.63f;
+    private float pauseBeforeCameraUpdate = 0.35f;
 
     private void Start()
     {
@@ -20,26 +26,36 @@ public class StartSequence : MonoBehaviour
     {
         timer += Time.deltaTime;
 
-        if (timer >= 5.63f && !activated)
+        if (timer >= animationLength && !activated)
         {
             activated = true;
 
             endGame.isPaused = false;
+            playMessage.SetActive(false);
 
-            StartCoroutine(MoveCamera());
-            StartCoroutine(RotateCamera());
+            StartCoroutine(CameraUpdate());
         }
+    }
+
+    private IEnumerator CameraUpdate()
+    {
+        StartCoroutine(MoveCamera());
+        yield return StartCoroutine(RotateCamera());
+
+        trackers.SetActive(true);
+        endGame.isPaused = false;
+
+        enabled = false;
     }
 
     private IEnumerator MoveCamera()
     {
-        yield return new WaitForSeconds(0.35f);
-
-        float positionTimer = 0f;
+        yield return new WaitForSeconds(pauseBeforeCameraUpdate);
 
         Vector3 startPosition = cam.transform.position;
-        Vector3 finalPosition = new Vector3(0, 9.7f, 10f);
+        Vector3 finalPosition = endPosition;
 
+        float positionTimer = 0f;
         while (positionTimer < 1f)
         {
             positionTimer += Time.deltaTime;
@@ -52,13 +68,12 @@ public class StartSequence : MonoBehaviour
 
     private IEnumerator RotateCamera()
     {
-        yield return new WaitForSeconds(0.35f);
-
-        float rotationTimer = 0f;
+        yield return new WaitForSeconds(pauseBeforeCameraUpdate);
 
         Quaternion startRotation = cam.transform.rotation;
-        Quaternion finalRotation = Quaternion.Euler(new Vector3(50, -180, 0));
+        Quaternion finalRotation = Quaternion.Euler(endRotation);
 
+        float rotationTimer = 0f;
         while (rotationTimer < 1f)
         {
             rotationTimer += Time.deltaTime;
@@ -67,8 +82,5 @@ public class StartSequence : MonoBehaviour
 
             yield return null;
         }
-
-        trackers.SetActive(true);
-        endGame.isPaused = false;
     }
 }
